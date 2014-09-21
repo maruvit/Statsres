@@ -1,0 +1,48 @@
+---
+title: "Statistical Research - Coursera"
+author: "Maruthi"
+date: "Sunday, September 21, 2014"
+output: 
+    pdf_document:
+        keep_md: yes
+---
+##Problem Statement
+Now in the second portion of the class, we're going to analyze the ToothGrowth data in the R datasets package. 
+Load the ToothGrowth data and perform some basic exploratory data analyses.  
+Provide a basic summary of the data.  
+Use confidence intervals and hypothesis tests to compare tooth growth by supp 
+and dose. (Use the techniques from class even if there's other approaches worth considering)  
+State your conclusions and the assumptions needed for your conclusions.   
+
+#Data Analysis
+
+```{r plot}
+library(datasets)
+summary(ToothGrowth)
+library(ggplot2)
+ggplot(data=ToothGrowth, aes(x=as.factor(dose), y=len, fill=supp)) +
+    geom_bar(stat="identity",) +
+    facet_grid(. ~ supp) +
+    xlab("Dose in mg") +
+    ylab("Tooth length") +
+    guides(fill=guide_legend(title="Dosage type"))
+```
+
+It should be clear that for both the dosages, the tooth length increases with the dosage.
+
+Now, lets run a regression analysis to find the relation between dosage and tooth length
+
+```{r fit}
+fit <- lm(len ~ dose + supp, data=ToothGrowth)
+summary(fit)
+```
+
+The sumamry shows that 70% (R Squared) of the variance in the data could be explainied by the above equation. The intercept is `r fit$coefficients[[1]]`, which implies that with no supplements of Vitamin C, the average tooth length is `r fit$coefficients[[1]]` units. The coefficient of dose is `r fit$coefficients[[2]]`. It implies that increasing the delievered dose by 1 mg, would 
+increase the tooth length by `r fit$coefficients[[2]]` units. The last coefficient
+is for the dosage type.  The value for suppVC  is `r fit$coefficients[[3]]` meaning that delivering a given dose as ascorbic acid, without changing the dose, would result in `r abs(fit$coefficients[[3]])` units of decrease in the tooth length. Since there are only two categories, we can also conclude that on average, delivering the dosage as OJ would increase the tooth length by `r abs(fit$coefficients[[3]])` units.
+
+95% confidence intervals for two variables and the intercept are as follows.
+```{r confint}
+confint(fit)
+```
+The confidence intervals mean that if we collect a different set of data and estimate parameters of the linear model many times, 95% of the time, the coefficient estimations will be in these ranges.
